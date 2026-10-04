@@ -14,38 +14,26 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Resolve latest claude-desktop .deb
         id: deb
         run: |
-          REL=$(curl -fsSL "https://downloads.claude.ai/claude-desktop/apt/stable/dists/stable/main/binary-amd64/Packages" \
-            | grep '^Filename: pool/main/c/claude-desktop/claude-desktop_' | sort -V | tail -n 1 | cut -d' ' -f2)
+          REL=$(curl -fsSL "https://downloads.claude.ai/claude-desktop/apt/stable/dists/stable/main/binary-amd64/Packages" | grep '^Filename: pool/main/c/claude-desktop/claude-desktop_' | sort -V | tail -n 1 | cut -d' ' -f2)
           echo "rel=$REL" >> "$GITHUB_OUTPUT"
-
       - name: Download claude-desktop .deb
         run: curl -fLO "https://downloads.claude.ai/claude-desktop/apt/stable/${{ steps.deb.outputs.rel }}"
-
       - name: Extract .deb
-        run: |
-          mkdir -p extract
-          dpkg-deb -x claude-desktop_*.deb extract/
-
+        run: mkdir -p extract && dpkg-deb -x claude-desktop_*.deb extract/
       - name: Locate asar
         id: asar
         run: |
           find extract -name '*.asar' | tee asar-list.txt
           A=$(find extract -name 'app.asar' | head -n1)
           echo "path=$A" >> "$GITHUB_OUTPUT"
-
       - name: Unpack app.asar
-        run: |
-          mkdir -p unpacked
-          npx --yes asar extract "${{ steps.asar.outputs.path }}" unpacked
-
+        run: mkdir -p unpacked && npx --yes asar extract "${{ steps.asar.outputs.path }}" unpacked
       - name: Analyze
         run: |
           mkdir -p report
@@ -59,37 +47,43 @@ jobs:
             echo "## asar 清单"
             cat asar-list.txt
             echo
-            echo "## 解包后顶层结构"
-            ls -la unpacked
-            echo
             echo "## 目录树（3 层）"
             find unpacked -maxdepth 3 -type d | sort
-            echo
-            echo "## package.json"
-            cat unpacked/package.json 2>/dev/null || echo '(none)'
             echo
             echo "## 关键字命中文件数（JS 文件）"
             for kw in Cowork cowork MCP mcp Skill skill Plugin plugin Connector connector desktop code; do
               printf '%s: %s files\n' "$kw" "$(grep -rl -- "$kw" unpacked --include='*.js' 2>/dev/null | wc -l)"
             done
             echo
-            echo "## Agent 协议模式（全部 build JS，双/单引号都算）"
-            for p in tool_use tool_result tool_choice permission_mode allowedTools disallowedTools input_schema mcpServers context_window system_prompt stop_reason; do
+            echo "## Agent 协议模式（全部 build JS）"
+            for p in tool_use tool_result tool_choice permission_mode allowedTools disallowedTools input_schema mcpServers content_block_stop; do
               N=$(grep -rho --include='*.js' -e "\"$p\"" -e "'$p'" "$B" 2>/dev/null | wc -l)
               printf '%s: %s\n' "$p" "$N"
             done
             echo
-            echo "## 内置工具名定义（全部 build JS）"
-            for t in Read Write Edit Bash Glob Grep TodoWrite Task WebFetch WebSearch LS NotebookEdit Notebook; do
-              N=$(grep -rhoE --include='*.js' "name:[[:space:]]*[\"']?$t[\"']?[,}]" "$B" 2>/dev/null | wc -l)
+            echo "## 内置工具定义（\"name\":\"X\" 形式）"
+            for t in Read Write Edit Bash Glob Grep TodoWrite Task WebFetch WebSearch LS NotebookEdit MultiEdit; do
+              N=$(grep -rhoE --include='*.js' "\"name\":[[:space:]]*\"$t\"" "$B" 2>/dev/null | wc -l)
               printf '%s: %s\n' "$t" "$N"
             done
             echo
-            echo "## 消息角色命中（全部 build JS）"
+            echo "## 消息角色命中"
             for r in user assistant system tool; do
               N=$(grep -rho --include='*.js' -e "\"$r\"" -e "'$r'" "$B" 2>/dev/null | wc -l)
               printf '%s: %s\n' "$r" "$N"
             done
+            echo
+            echo "## tool_use 上下文样本"
+            grep -rhoE --include='*.js' '.{50}\"tool_use\".{100}' "$B" 2>/dev/null | head -6
+            echo
+            echo "## tool_result 上下文样本"
+            grep -rhoE --include='*.js' '.{50}\"tool_result\".{100}' "$B" 2>/dev/null | head -6
+            echo
+            echo "## mcpServers 上下文样本"
+            grep -rhoE --include='*.js' '.{30}\"mcpServers\".{120}' "$B" 2>/dev/null | head -6
+            echo
+            echo "## permission_mode 上下文样本"
+            grep -rhoE --include='*.js' '.{40}permission_mode.{80}' "$B" 2>/dev/null | head -6
             echo
             echo "## 最大的 20 个 JS 文件"
             find unpacked -name '*.js' -type f -printf '%s %p\n' 2>/dev/null | sort -rn | head -20
@@ -98,7 +92,6 @@ jobs:
             find unpacked -type f | wc -l
             du -sh unpacked
           } > report/REVERSE-CLAUDE-DESKTOP.md
-
       - name: Upload unpacked artifact
         uses: actions/upload-artifact@v4
         with:
@@ -107,7 +100,6 @@ jobs:
             unpacked
             report
           retention-days: 7
-
       - name: Commit report
         run: |
           git config user.name "github-actions[bot]"
