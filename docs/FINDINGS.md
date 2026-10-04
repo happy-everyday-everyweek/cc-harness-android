@@ -51,10 +51,29 @@ license: Proprietary. LICENSE.txt has complete terms
 - 消息角色：user（471 次）、assistant（171）、system（130）、tool（15）
 - 权限模式 permission_mode：default、auto、bypassPermissions
 - 控制工具集：set_model、set_permission_mode、interrupt、stop_task、background_tasks、cancel_async_message、set_max_thinking_tokens
-- MCP 配置：mcpServers 键，旧 record 格式 {"mcpServers":{name:{toolPolicy:{tool:"blocked"}}}} 已废弃，新数组格式 [{"serverName":"...","tools":[{"toolName":"...","permission":"..."}]}]；另有 agents 键；配置上限 262144 字节；配置来源 orgPluginSettings 与 .mcp.json
-- 工具权限策略 toolPolicy：按工具名 allow/block，写工具受门控（gatedWriteToolCalls）
-- Cowork 特有工具：SendUserMessage、PushNotification
-- 会话字段：sessionType、isResume、isFirstMessage、parent_tool_use_id
+- 会话指标：turnToolCallCount、turnHadSendUserMessage、had_send_user_message、error_max_turns
+- 会话标志：hasHtmlArtifacts、hasWritingDraft、imagineElicitationEnabled、localPlugins
+
+## MCP 配置与权限
+- mcpServers 键，旧 record 格式 {"mcpServers":{name:{toolPolicy:{tool:"blocked"}}}} 已废弃
+- 新数组格式 [{"serverName":"...","tools":[{"toolName":"...","permission":"..."}]}]，record 与数组互转
+- 另有 agents 键；配置上限 262144 字节；配置来源 orgPluginSettings 与 .mcp.json
+- 权限值：blocked、ask-session
+- toolPolicy 过滤：被 block 的工具调用返回 "Tool 'X' is not permitted" 错误
+- 写工具门控：gatedWriteToolCalls
+
+## 插件生态（从主 bundle 提取）
+- 插件类型清单：commands、agents、output-styles、skills、workflows、routines、themes、rules、session-env、uploads、mcp-skills
+- 插件目录映射：commands/、agents/、hooks/、mcpServers（.mcp.json 根级）
+- API 路径（v1）：agents、environments/bridge、deployments、workspaces
+- 目录键映射 xE：commands→commands、agents→agents、hooks→hooks、mcpServers→"."（根级）
+
+## Cowork 特有行为
+- Cowork 工具：SendUserMessage、PushNotification
+- 检测逻辑：tool_use 且 name 为 SendUserMessage 或 PushNotification
+- agent 完成后通过 SendUserMessage 向用户报告结果
+- sessionType==="agent" 时 turnHadSendUserMessage 强制为 undefined（agent 会话不直接发用户消息）
+- 元通知机制：enqueueMetaNotification
 
 ## 关键字命中（JS 文件数）
 code 183、desktop 93、mcp 72、plugin 54、cowork 46、skill 36、connector 26
@@ -63,5 +82,6 @@ code 183、desktop 93、mcp 72、plugin 54、cowork 46、skill 36、connector 26
 - Agent 循环协议以 claude-agent-sdk 为准，TS 实现，Android 侧可按同协议重写
 - Skills 生态格式 = SKILL.md + scripts 的 ZIP 包，Android 侧做同格式解析器即可兼容
 - MCP 是标准协议，Android 可复用 @modelcontextprotocol/sdk（Node）或 Kotlin MCP 实现
-- 权限模型三层：permission_mode（全局）→ toolPolicy（按 MCP 工具）→ 写工具门控
+- 权限模型三层：permission_mode（全局）→ toolPolicy（按 MCP 工具，blocked/ask-session）→ 写工具门控
+- 插件类型 11 种，Android 侧至少实现 skills + commands + mcp-skills 三种即可覆盖核心生态
 - Cowork 与 Code 共享 tool_use/tool_result 协议，Cowork 侧重 SendUserMessage/PushNotification 这类用户交互工具
