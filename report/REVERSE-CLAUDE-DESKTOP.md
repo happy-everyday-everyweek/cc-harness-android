@@ -3,57 +3,6 @@
 ## 包来源
 https://downloads.claude.ai/claude-desktop/apt/stable/pool/main/c/claude-desktop/claude-desktop_2.9939.4_amd64.deb
 
-## asar 清单
-extract/usr/lib/claude-desktop/resources/app.asar
-
-## 目录树（3 层）
-unpacked
-unpacked/.vite
-unpacked/.vite/build
-unpacked/.vite/build/file-index-worker
-unpacked/.vite/build/heavy-work-worker
-unpacked/.vite/build/mcp-runtime
-unpacked/.vite/build/pty-host
-unpacked/.vite/build/shell-path-worker
-unpacked/.vite/build/stall-sampler-worker
-unpacked/.vite/build/transcript-search-worker
-unpacked/.vite/renderer
-unpacked/.vite/renderer/about_window
-unpacked/.vite/renderer/buddy_window
-unpacked/.vite/renderer/find_in_page
-unpacked/.vite/renderer/local_exec_consent
-unpacked/.vite/renderer/main_window
-unpacked/.vite/renderer/quick_window
-unpacked/compile-cache
-unpacked/node_modules
-unpacked/node_modules/@ant
-unpacked/node_modules/@ant/claude-native
-unpacked/node_modules/agent-base
-unpacked/node_modules/agent-base/dist
-unpacked/node_modules/node-pty
-unpacked/node_modules/node-pty/lib
-unpacked/node_modules/node-pty/prebuilds
-unpacked/node_modules/ws
-unpacked/node_modules/ws/lib
-unpacked/resources
-unpacked/resources/bundled-skills
-unpacked/resources/github-mcp
-unpacked/resources/office365-mcp
-
-## 关键字命中文件数（JS 文件）
-Cowork: 34 files
-cowork: 46 files
-MCP: 38 files
-mcp: 72 files
-Skill: 24 files
-skill: 36 files
-Plugin: 34 files
-plugin: 54 files
-Connector: 18 files
-connector: 26 files
-desktop: 93 files
-code: 183 files
-
 ## Agent 协议模式（全部 build JS）
 tool_use: 69
 tool_result: 68
@@ -64,27 +13,6 @@ disallowedTools: 1
 input_schema: 0
 mcpServers: 16
 content_block_stop: 6
-
-## 内置工具定义（"name":"X" 形式）
-Read: 0
-Write: 0
-Edit: 0
-Bash: 0
-Glob: 0
-Grep: 0
-TodoWrite: 0
-Task: 0
-WebFetch: 0
-WebSearch: 0
-LS: 0
-NotebookEdit: 0
-MultiEdit: 0
-
-## 消息角色命中
-user: 471
-assistant: 171
-system: 130
-tool: 15
 
 ## tool_use 上下文样本
 sistant"&&e.parent_tool_use_id==null?L9(e.message,"tool_use","id"):[]}function L9(e,t,n){let r=Z5(e)?e.content:void 0;if(!Array.isArray(r))return[];let i=[];for
@@ -117,6 +45,32 @@ ode-${n.hex32()}`,request:{subtype:"set_permission_mode",mode:t.permissionMode}}
 u.name,prompt:u.prompt,permissionMode:u.permission_mode==="auto"||u.permission_mode==="bypassPermissions"?u.permission_mode:void 0,fold
 re??"no_window"}`}}let{prompt:w,model:T,permission_mode:E,...D}=u;return{body:{...D,...d!==void 0&&{folders:d},target_device_id:x,...S&
 rorDetail:"modes_unknown"};let l=e.body.permission_mode;if(l!==void 0&&l!=="default"&&!c.has(l))return{outcome:"declined_mode_unavailab
+
+## Cowork 工具上下文样本
+ome((e=>e.type==="tool_use"&&(e.name==="SendUserMessage"||e.name==="PushNotification")));case"system":return"subtype"in e&&(e.subtype==="thinking
+he outcome, then report to the user via SendUserMessage.`;this.dispatchIdleWaiters.has(e.sessionId)||(r.inputStream?this.enqueueMetaNotification(
+he outcome, then report to the user via SendUserMessage.`;if(i.inputStream){this.enqueueMetaNotification(i,a);return}if(i.lifecycleState==="initi
+ant"&&n.sessionType==="agent"&&n.turnHadSendUserMessage===!1&&e.parent_tool_use_id==null&&Array.isArray(e.message?.content)){for(let r of e.messa
+)&&r.name==="SendUserMessage"){n.turnHadSendUserMessage=!0;break}}if(e.type==="assistant"&&e.parent_tool_use_id==null&&Array.isArray(e.message?.c
+alls:r.turnToolCallCount??0,...r.turnHadSendUserMessage!==void 0&&{had_send_user_message:r.turnHadSendUserMessage}}),a==="error_max_turns"&&t._M(
+stResultUnreachable=!1,r.pendingCycleHadSendUserMessage=r.turnHadSendUserMessage,r.turnHadSendUserMessage=r.sessionType!=="agent"&&void 0,r.turnL
+:Y,genAtBuild:se,hasHtmlArtifacts:ee,hasSendUserMessage:Ft,hasWritingDraft:Pt,imagineElicitationEnabled:ut,inputStream:be,localPlugins:Ue,mountDi
+
+## toolPolicy 上下文样本
+ames:r.slice(0,20).join(",")})}}let n=f.toolPolicy?m.filter(t=>e.Bq(f.toolPolicy,t.name)!=="blocked"):m,g=a?n.filter(e=>a[`${f.name}:${e.nam
+:"respawn_failed"),t.t(P(s))}}if(e.Bq(g.toolPolicy,u)==="blocked")return{content:[{type:"text",text:`Tool '${u}' is not permitted`}],isError
+:"Tool policy",id:"uSQ/bLKBIp"}),_Te=j({toolPolicy:mTe.optional()}),vTe=j({mcpServers:M(D(),_Te.catch({})).optional()});function yTe(e){if(A
+=>({serverName:e,tools:Object.entries(t.toolPolicy??{}).map((([e,t])=>({toolName:e,permission:t})))}))):e}var bTe=j({toolName:gs(D().min(1),
+s(e.mcpServers).flatMap((e=>Ks(e)&&Ks(e.toolPolicy)?[e.toolPolicy]:[])):[],wTe={path:'orgPluginSettings[].tools[].permission: "ask-session"'
+cpServers).map((([e,t])=>[e,Ks(t)&&Ks(t.toolPolicy)?{...t,toolPolicy:fTe(t.toolPolicy)}:t])))}}};function TTe(e){return ts(STe,ts(wTe,e))}va
+
+## agents 配置上下文样本
+xK(),TK(),OK(),kK=["commands","agents","output-styles","skills","workflows","routines","themes","rules","session-env","uploads","mcp-skill
+,q("sessions"),vf],[q("v1"),q("agents"),J],[q("v1"),q("environments"),q("bridge"),J],[q("v1"),q("environments"),J],[q("v1"),q("deployments
+lts"),J],[q("workspaces"),J,q("agents"),J],[q("workspaces"),J,q("environments"),J],[q("workspaces"),J,q("deployments"),J],[q("workspaces")
+ns"),vf],[q("v1"),q("beta"),q("agents"),J],[q("v1"),q("beta"),q("environments"),J],[q("v1"),q("beta"),q("deployments"),J],[q("v1"),q("beta
+keys(t)}var oXt=["mcpServers","agents"],sXt=262144;function yE(e){if(e.clis&&typeof e.clis=="object"&&!Array.isArray(e.clis)){let t=Object
+s",commands:"commands",agents:"agents",hooks:"hooks",mcpServers:"."},dXt=new Set([...Object.values(xE).filter((e=>e!==".")),".claude-plugi
 
 ## 最大的 20 个 JS 文件
 6600826 unpacked/.vite/build/index.chunk-DuaKZOPP.js
