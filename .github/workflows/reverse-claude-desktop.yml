@@ -1,0 +1,93 @@
+name: reverse-claude-desktop
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  reverse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve latest claude-desktop .deb
+        id: deb
+        run: |
+          REL=$(curl -fsSL "https://downloads.claude.ai/claude-desktop/apt/stable/dists/stable/main/binary-amd64/Packages" \
+            | grep '^Filename: pool/main/c/claude-desktop/claude-desktop_' | sort -V | tail -n 1 | cut -d' ' -f2)
+          echo "rel=$REL" >> "$GITHUB_OUTPUT"
+
+      - name: Download claude-desktop .deb
+        run: curl -fLO "https://downloads.claude.ai/${{ steps.deb.outputs.rel }}"
+
+      - name: Extract .deb
+        run: |
+          mkdir -p extract
+          dpkg-deb -x claude-desktop_*.deb extract/
+
+      - name: Locate asar
+        id: asar
+        run: |
+          find extract -name '*.asar' | tee asar-list.txt
+          A=$(find extract -name 'app.asar' | head -n1)
+          echo "path=$A" >> "$GITHUB_OUTPUT"
+
+      - name: Unpack app.asar
+        run: |
+          mkdir -p unpacked
+          npx --yes asar extract "${{ steps.asar.outputs.path }}" unpacked
+
+      - name: Analyze
+        run: |
+          mkdir -p report
+          {
+            echo "# Claude Desktop 逆向分析"
+            echo
+            echo "## 包来源"
+            echo "https://downloads.claude.ai/${{ steps.deb.outputs.rel }}"
+            echo
+            echo "## asar 清单"
+            cat asar-list.txt
+            echo
+            echo "## 解包后顶层结构"
+            ls -la unpacked
+            echo
+            echo "## 目录树（3 层）"
+            find unpacked -maxdepth 3 -type d | sort
+            echo
+            echo "## package.json"
+            cat unpacked/package.json 2>/dev/null || echo '(none)'
+            echo
+            echo "## 关键字命中文件数（JS 文件）"
+            for kw in Cowork cowork MCP mcp Skill skill Plugin plugin Connector connector desktop code; do
+              printf '%s: %s files\n' "$kw" "$(grep -rl -- "$kw" unpacked --include='*.js' 2>/dev/null | wc -l)"
+            done
+            echo
+            echo "## 最大的 20 个 JS 文件"
+            find unpacked -name '*.js' -type f -printf '%s %p\n' 2>/dev/null | sort -rn | head -20
+            echo
+            echo "## 文件总数与总大小"
+            find unpacked -type f | wc -l
+            du -sh unpacked
+          } > report/REVERSE-CLAUDE-DESKTOP.md
+
+      - name: Upload unpacked artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-desktop-unpacked
+          path: unpacked
+          retention-days: 7
+
+      - name: Commit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add report/
+          git commit -m "docs: Claude Desktop 逆向分析报告" || echo "nothing to commit"
+          git push
