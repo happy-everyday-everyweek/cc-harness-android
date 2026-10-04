@@ -6,16 +6,6 @@ https://downloads.claude.ai/claude-desktop/apt/stable/pool/main/c/claude-desktop
 ## asar 清单
 extract/usr/lib/claude-desktop/resources/app.asar
 
-## 解包后顶层结构
-total 32
-drwxr-xr-x 6 runner runner 4096 Oct  4 15:05 .
-drwxr-xr-x 8 runner runner 4096 Oct  4 15:05 ..
-drwxr-xr-x 4 runner runner 4096 Oct  4 15:05 .vite
-drwxr-xr-x 2 runner runner 4096 Oct  4 15:05 compile-cache
-drwxr-xr-x 6 runner runner 4096 Oct  4 15:05 node_modules
--rw-r--r-- 1 runner runner 5024 Oct  4 15:05 package.json
-drwxr-xr-x 5 runner runner 4096 Oct  4 15:05 resources
-
 ## 目录树（3 层）
 unpacked
 unpacked/.vite
@@ -50,154 +40,6 @@ unpacked/resources/bundled-skills
 unpacked/resources/github-mcp
 unpacked/resources/office365-mcp
 
-## package.json
-{
-  "name": "@ant/desktop",
-  "productName": "Claude",
-  "desktopName": "com.anthropic.Claude.desktop",
-  "version": "2.9939.4",
-  "author": "Anthropic PBC",
-  "description": "Desktop application for Claude.ai",
-  "main": ".vite/build/index.pre.js",
-  "private": true,
-  "engines": {
-    "node": ">=22.0.0"
-  },
-  "installConfig": {
-    "hoistingLimits": "workspaces"
-  },
-  "keywords": [],
-  "devDependencies": {
-    "@ant/alt-tool-runner": "workspace:*",
-    "@ant/app-cu-helper": "workspace:*",
-    "@ant/browser-tool-schemas": "*",
-    "@ant/cds": "workspace:*",
-    "@ant/chrome-native-host": "*",
-    "@ant/claude-ssh": "*",
-    "@ant/cowork-win32-service": "*",
-    "@ant/disclaimer": "*",
-    "@ant/dist-guards": "workspace:*",
-    "@ant/dxt-registry": "*",
-    "@ant/icons": "*",
-    "@ant/ipc-codegen": "*",
-    "@ant/managed-config": "*",
-    "@ant/oxlint-config": "*",
-    "@ant/private-api-client": "*",
-    "@ant/rfb-client": "*",
-    "@ant/sbom": "workspace:*",
-    "@ant/security": "*",
-    "@ant/session-halo-helper": "workspace:*",
-    "@ant/ssh-askpass": "*",
-    "@ant/typography": "*",
-    "@ant/utils": "*",
-    "@anthropic-ai/claude-agent-sdk": "0.3.284-rc.20260927.t043816.sha16cbb4d",
-    "@anthropic-ai/claude-agent-sdk-future": "npm:@anthropic-ai/claude-agent-sdk@0.3.283-dev.20260924.t125113.sha53ccb13",
-    "@anthropic-ai/electron-devtools-mcp": "workspace:*",
-    "@anthropic-ai/mcpb": "2.1.2",
-    "@anthropic-ai/sdk": "catalog:",
-    "@electron-forge/cli": "8.0.0-alpha.10",
-    "@electron-forge/maker-base": "8.0.0-alpha.10",
-    "@electron-forge/maker-deb": "patch:@electron-forge/maker-deb@npm:8.0.0-alpha.10#~/.yarn/patches/@electron-forge-maker-deb-npm-8.0.0-alpha.10-1457f432a7.patch",
-    "@electron-forge/maker-dmg": "8.0.0-alpha.10",
-    "@electron-forge/maker-msix": "8.0.0-alpha.10",
-    "@electron-forge/maker-pkg": "patch:@electron-forge/maker-pkg@npm:8.0.0-alpha.10#~/.yarn/patches/@electron-forge-maker-pkg-npm-8.0.0-alpha.10-12af860aea.patch",
-    "@electron-forge/maker-rpm": "8.0.0-alpha.10",
-    "@electron-forge/maker-squirrel": "8.0.0-alpha.10",
-    "@electron-forge/maker-zip": "8.0.0-alpha.10",
-    "@electron-forge/plugin-base": "8.0.0-alpha.10",
-    "@electron-forge/plugin-fuses": "8.0.0-alpha.10",
-    "@electron-forge/plugin-vite": "8.0.0-alpha.10",
-    "@electron-forge/publisher-gcs": "8.0.0-alpha.10",
-    "@electron-forge/publisher-static": "8.0.0-alpha.10",
-    "@electron-forge/shared-types": "8.0.0-alpha.10",
-    "@electron/fuses": "^2.1.3",
-    "@electron/get": "^5.0.0",
-    "@electron/notarize": "^3.1.0",
-    "@formatjs/intl": "4.1.15",
-    "@google-cloud/storage": "^7.18.0",
-    "@malept/cross-spawn-promise": "^2.0.0",
-    "@modelcontextprotocol/client": "catalog:",
-    "@modelcontextprotocol/core": "catalog:",
-    "@modelcontextprotocol/sdk": "catalog:",
-    "@noble/hashes": "2.3.0",
-    "@sentry/electron": "^7.12.0",
-    "@sentry/vite-plugin": "^4.3.0",
-    "@tailwindcss/forms": "^0.5.3",
-    "@tailwindcss/postcss": "catalog:",
-    "@types/fs-extra": "^11.0.4",
-    "@types/js-yaml": "^4.0.9",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "catalog:",
-    "@types/plist": "^3",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
-    "@types/semver": "^7.7.0",
-    "@types/ssh2": "^1.15.5",
-    "@types/yauzl": "^2.10.3",
-    "@typescript/typescript6": "catalog:",
-    "@vitejs/plugin-react": "catalog:",
-    "bcrypt-pbkdf": "^1.0.2",
-    "clsx": "catalog:",
-    "conf": "^10.2.0",
-    "cookie": "1.1.1",
-    "cronstrue": "^3.9.0",
-    "cross-env": "^7.0.3",
-    "electron": "catalog:",
-    "electron-devtools-installer": "^4.0.0",
-    "electron-store": "^8.2.0",
-    "electron-window-state": "^5.0.3",
-    "fflate": "^0.8.2",
-    "filenamify": "^7.0.2",
-    "form-data": "^4.0.4",
-    "fs-extra": "^11.3.0",
-    "js-yaml": "^4.1.1",
-    "jsonc-parser": "^3.3.1",
-    "jsonwebtoken": "9.0.3",
-    "knip": "catalog:",
-    "magic-string": "^0.30.21",
-    "mime": "^4.0.7",
-    "oxfmt": "catalog:",
-    "oxlint": "catalog:",
-    "oxlint-tsgolint": "^7.0.2001",
-    "p-queue": "^8.0.0",
-    "playwright-core": "1.57.0",
-    "plist": "^3.1.0",
-    "postcss": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
-    "react-intl": "catalog:",
-    "rxjs": "^7.8.1",
-    "semver": "^7.7.2",
-    "sharp": "catalog:",
-    "ssh2": "^1.16.0",
-    "tailwindcss": "catalog:",
-    "tar": "catalog:",
-    "terser": "^5.47.1",
-    "ts-morph": "^27.0.0",
-    "tsx": "catalog:",
-    "typescript": "catalog:",
-    "vite": "catalog:",
-    "vitest": "catalog:",
-    "winston": "^3.17.0",
-    "winston-transport": "^4.9.0",
-    "yauzl": "^3.2.0",
-    "zod": "catalog:"
-  },
-  "dependencies": {
-    "@ant/claude-for-chrome-mcp": "*",
-    "@ant/claude-native": "*",
-    "@ant/claude-swift": "*",
-    "@ant/computer-use-mcp": "*",
-    "@ant/imagine-server": "*",
-    "@loc/electron-window": "1.1.0",
-    "https-proxy-agent": "^7.0.6",
-    "ws": "^8.18.0"
-  },
-  "optionalDependencies": {
-    "node-pty": "1.2.0-beta.14"
-  }
-}
-
 ## 关键字命中文件数（JS 文件）
 Cowork: 34 files
 cowork: 46 files
@@ -212,7 +54,7 @@ connector: 26 files
 desktop: 93 files
 code: 183 files
 
-## Agent 协议模式（全部 build JS，双/单引号都算）
+## Agent 协议模式（全部 build JS）
 tool_use: 69
 tool_result: 68
 tool_choice: 0
@@ -221,11 +63,9 @@ allowedTools: 0
 disallowedTools: 1
 input_schema: 0
 mcpServers: 16
-context_window: 0
-system_prompt: 0
-stop_reason: 0
+content_block_stop: 6
 
-## 内置工具名定义（全部 build JS）
+## 内置工具定义（"name":"X" 形式）
 Read: 0
 Write: 0
 Edit: 0
@@ -238,13 +78,45 @@ WebFetch: 0
 WebSearch: 0
 LS: 0
 NotebookEdit: 0
-Notebook: 0
+MultiEdit: 0
 
-## 消息角色命中（全部 build JS）
+## 消息角色命中
 user: 471
 assistant: 171
 system: 130
 tool: 15
+
+## tool_use 上下文样本
+sistant"&&e.parent_tool_use_id==null?L9(e.message,"tool_use","id"):[]}function L9(e,t,n){let r=Z5(e)?e.content:void 0;if(!Array.isArray(r))return[];let i=[];for
+stant":return!e.message.content.some((e=>e.type==="tool_use"&&(e.name==="SendUserMessage"||e.name==="PushNotification")));case"system":return"subtype"in e&&(e.s
+thinking_delta"?"thinking":o==="input_json_delta"?"tool_use":"text",is_first_message:i.isFirstMessage,is_resume:i.isResume,session_type:n.sessionType,parent_ses
+al(),_meta:M(D(),Rn()).optional()}),uqe=j({type:N("tool_use"),name:D(),id:D(),input:M(D(),Rn()),_meta:M(D(),Rn()).optional()}),dqe=j({type:N("resource"),resourc
+nal(),_meta:M(D(),Rn()).optional()}),He=j({type:N("tool_use"),name:D(),id:D(),input:M(D(),Rn()),_meta:M(D(),Rn()).optional()}),Ue=j({type:N("resource"),resource
+nal(),_meta:M(D(),Rn()).optional()}),_e=j({type:N("tool_use"),name:D(),id:D(),input:M(D(),Rn()),_meta:M(D(),Rn()).optional()}),ve=j({type:N("resource"),resource
+
+## tool_result 上下文样本
+="user"&&this.toolResultReleases(e.message))return"tool_result";if(!(this.holdRule===void 0||this.mayWaitUnderHold(e)))return"event"}toolResultReleases(e){let t=th
+ools:void 0;return t!=="write"&&t!=="all"?!1:L9(e,"tool_result","tool_use_id").some((e=>t==="all"||this.gatedWriteToolCalls.has(e)))}gateToolCall(e){let t=this.flu
+Uploader.enqueue(c,l?{release:"event"}:u?{release:"tool_result"}:d.some((e=>this.awaitedToolCalls.has(e)))?{release:"tool_call"}:this.transcriptRowMayWait(e,s)?voi
+turn Array.isArray(t)&&t.some((e=>Z5(e)&&e.type==="tool_result"))}function I9(e){return Z5(e)&&e.type==="assistant"&&e.parent_tool_use_id==null?L9(e.message,"tool_
+["message","content"],((e,n)=>{if(Lt(e)&&e.type==="tool_result"&&Array.isArray(e.content)){let r=Gt(e.content,[...n,"content"],((e,n)=>Wt(e,n,t)));return r===e.con
+urn typeof e=="object"&&!!e&&"type"in e&&e.type==="tool_result"&&"tool_use_id"in e&&typeof e.tool_use_id=="string"}function Uc(e){if(typeof e=="string")return e;if
+
+## mcpServers 上下文样本
+path:'orgPluginSettings as a {"mcpServers": {\u2026}} record',use:'the array form [{"serverName": "\u2026", "tools": [{"toolName": "\u2026", "permission": "\u2026
+```\nThe older record form (`{"mcpServers": {"internal-search": {"toolPolicy": {"delete_document": "blocked"}}}}`) is deprecated and accepted only until '+hSe(STe
+;if(!e||typeof e!="object"||!("mcpServers"in e)||!e.mcpServers||typeof e.mcpServers!="object")return{filteredConfig:e,invalidServers:t};let n=Object.create(null);
+t)?[]:Object.keys(t)}var oXt=["mcpServers","agents"],sXt=262144;function yE(e){if(e.clis&&typeof e.clis=="object"&&!Array.isArray(e.clis)){let t=Object.create(nul
+ e of oXt){let n=bXt(r,e);e==="mcpServers"&&(n=yXt(n,t)),n!==void 0&&(i[e]=n,a=!0)}return a?i:null}function yXt(e,t){let n=e=>typeof e=="object"&&!!e&&!Array.isAr
+ r of Object.keys(xE)){if(r==="mcpServers"){if(await TXt(e,(0,n.join)(e,".mcp.json")))return!1;let r=t?.mcpServers,i=Array.isArray(r)?r.filter((e=>typeof e=="obje
+
+## permission_mode 上下文样本
+urn}P=E5(e.request_id,t);break}case"set_permission_mode":{let t=Wre(e.request.mode),n=t===void 0?{ok:!1,error:Gre}:g?.(t)??{ok:!1,error
+Bp())}var Qie=new Set(["set_model","set_permission_mode","interrupt","stop_task","background_tasks","cancel_async_message","set_max_thi
+ode-${n.hex32()}`,request:{subtype:"set_permission_mode",mode:t.permissionMode}}}}),t.folders!==void 0&&t.folders.length>0&&r.push({pay
+u.name,prompt:u.prompt,permissionMode:u.permission_mode==="auto"||u.permission_mode==="bypassPermissions"?u.permission_mode:void 0,fold
+re??"no_window"}`}}let{prompt:w,model:T,permission_mode:E,...D}=u;return{body:{...D,...d!==void 0&&{folders:d},target_device_id:x,...S&
+rorDetail:"modes_unknown"};let l=e.body.permission_mode;if(l!==void 0&&l!=="default"&&!c.has(l))return{outcome:"declined_mode_unavailab
 
 ## 最大的 20 个 JS 文件
 6600826 unpacked/.vite/build/index.chunk-DuaKZOPP.js
