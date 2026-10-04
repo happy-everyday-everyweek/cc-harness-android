@@ -8,13 +8,13 @@ extract/usr/lib/claude-desktop/resources/app.asar
 
 ## 解包后顶层结构
 total 32
-drwxr-xr-x 6 runner runner 4096 Oct  4 15:03 .
-drwxr-xr-x 8 runner runner 4096 Oct  4 15:03 ..
-drwxr-xr-x 4 runner runner 4096 Oct  4 15:03 .vite
-drwxr-xr-x 2 runner runner 4096 Oct  4 15:03 compile-cache
-drwxr-xr-x 6 runner runner 4096 Oct  4 15:03 node_modules
--rw-r--r-- 1 runner runner 5024 Oct  4 15:03 package.json
-drwxr-xr-x 5 runner runner 4096 Oct  4 15:03 resources
+drwxr-xr-x 6 runner runner 4096 Oct  4 15:05 .
+drwxr-xr-x 8 runner runner 4096 Oct  4 15:05 ..
+drwxr-xr-x 4 runner runner 4096 Oct  4 15:05 .vite
+drwxr-xr-x 2 runner runner 4096 Oct  4 15:05 compile-cache
+drwxr-xr-x 6 runner runner 4096 Oct  4 15:05 node_modules
+-rw-r--r-- 1 runner runner 5024 Oct  4 15:05 package.json
+drwxr-xr-x 5 runner runner 4096 Oct  4 15:05 resources
 
 ## 目录树（3 层）
 unpacked
@@ -212,26 +212,39 @@ connector: 26 files
 desktop: 93 files
 code: 183 files
 
-## 主进程协议模式（index.pre.js 命中次数）
-tool_use: 0
-tool_result: 0
+## Agent 协议模式（全部 build JS，双/单引号都算）
+tool_use: 69
+tool_result: 68
 tool_choice: 0
-permission_mode: 0
+permission_mode: 6
 allowedTools: 0
-disallowedTools: 0
+disallowedTools: 1
 input_schema: 0
-mcpServers: 0
-model: 0
+mcpServers: 16
 context_window: 0
 system_prompt: 0
+stop_reason: 0
 
-## 内置工具名定义命中（所有 build JS）
+## 内置工具名定义（全部 build JS）
+Read: 0
+Write: 0
+Edit: 0
+Bash: 0
+Glob: 0
+Grep: 0
+TodoWrite: 0
+Task: 0
+WebFetch: 0
+WebSearch: 0
+LS: 0
+NotebookEdit: 0
+Notebook: 0
 
-## 消息角色命中
-user: 0
-assistant: 0
-system: 0
-tool: 0
+## 消息角色命中（全部 build JS）
+user: 471
+assistant: 171
+system: 130
+tool: 15
 
 ## 最大的 20 个 JS 文件
 6600826 unpacked/.vite/build/index.chunk-DuaKZOPP.js
