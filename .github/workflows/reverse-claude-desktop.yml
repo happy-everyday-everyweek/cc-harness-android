@@ -38,41 +38,30 @@ jobs:
         run: |
           mkdir -p report
           B=unpacked/.vite/build
+          R=unpacked/.vite/renderer
           {
             echo "# Claude Desktop 逆向分析"
             echo
-            echo "## 包来源"
-            echo "https://downloads.claude.ai/claude-desktop/apt/stable/${{ steps.deb.outputs.rel }}"
+            echo "## 问候语上下文（渲染进程）"
+            grep -rhoE --include='*.js' '.{40}(Good morning|Good evening|Good afternoon).{60}' "$R" 2>/dev/null | head -8
+            echo
+            echo "## 字体声明（font-family，渲染进程）"
+            grep -rhoE --include='*.js' 'font-family:[^;}]{1,90}' "$R" 2>/dev/null | sort -u | head -20
+            echo
+            echo "## 字体名命中（渲染进程）"
+            for f in Claude Sans Styrene Inter Söhne Tiempos system-ui Roboto Helvetica Arial; do
+              N=$(grep -rho --include='*.js' -e "$f" "$R" 2>/dev/null | wc -l)
+              printf '%s: %s\n' "$f" "$N"
+            done
             echo
             echo "## Agent 协议模式（全部 build JS）"
-            for p in tool_use tool_result tool_choice permission_mode allowedTools disallowedTools input_schema mcpServers content_block_stop; do
+            for p in tool_use tool_result permission_mode mcpServers; do
               N=$(grep -rho --include='*.js' -e "\"$p\"" -e "'$p'" "$B" 2>/dev/null | wc -l)
               printf '%s: %s\n' "$p" "$N"
             done
             echo
-            echo "## tool_use 上下文样本"
-            grep -rhoE --include='*.js' '.{50}\"tool_use\".{100}' "$B" 2>/dev/null | head -6
-            echo
-            echo "## tool_result 上下文样本"
-            grep -rhoE --include='*.js' '.{50}\"tool_result\".{100}' "$B" 2>/dev/null | head -6
-            echo
-            echo "## mcpServers 上下文样本"
-            grep -rhoE --include='*.js' '.{30}\"mcpServers\".{120}' "$B" 2>/dev/null | head -6
-            echo
-            echo "## permission_mode 上下文样本"
-            grep -rhoE --include='*.js' '.{40}permission_mode.{80}' "$B" 2>/dev/null | head -6
-            echo
-            echo "## Cowork 工具上下文样本"
-            grep -rhoE --include='*.js' '.{40}(SendUserMessage|PushNotification).{90}' "$B" 2>/dev/null | head -8
-            echo
-            echo "## toolPolicy 上下文样本"
-            grep -rhoE --include='*.js' '.{40}toolPolicy.{90}' "$B" 2>/dev/null | head -6
-            echo
-            echo "## agents 配置上下文样本"
-            grep -rhoE --include='*.js' '.{30}\"agents\".{100}' "$B" 2>/dev/null | head -6
-            echo
-            echo "## 最大的 20 个 JS 文件"
-            find unpacked -name '*.js' -type f -printf '%s %p\n' 2>/dev/null | sort -rn | head -20
+            echo "## 最大的 12 个 JS 文件"
+            find unpacked -name '*.js' -type f -printf '%s %p\n' 2>/dev/null | sort -rn | head -12
             echo
             echo "## 文件总数与总大小"
             find unpacked -type f | wc -l
