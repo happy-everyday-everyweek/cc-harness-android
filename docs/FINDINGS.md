@@ -75,6 +75,14 @@ license: Proprietary. LICENSE.txt has complete terms
 - sessionType==="agent" 时 turnHadSendUserMessage 强制为 undefined（agent 会话不直接发用户消息）
 - 元通知机制：enqueueMetaNotification
 
+## UI 设计系统与字体
+- 主字体：Anthropic Sans（--font-sans → --font-anthropic-sans → "anthropic-sans"），fallback ui-sans-serif / -apple-system / system-ui
+- 衬线：Anthropic Serif（--font-anthropic-serif），fallback Georgia / Times New Roman
+- 等宽：ui-monospace / SFMono-Regular / Menlo / Monaco / Consolas
+- 图标字体：Anthropicons（--font-anthropicons，Anthropicons-Variable）
+- 设计系统变量：--cds-font-sans、--cds-font-sans-display、--_cds-title-family（CDS，Claude Design System）
+- 问候语：首页 Good morning/afternoon/evening 为按时间段生成的 greeting 属性；用户输入问候用正则 /^(hi|hey|hello|good (morning|afternoon|evening))/ 识别
+
 ## 关键字命中（JS 文件数）
 code 183、desktop 93、mcp 72、plugin 54、cowork 46、skill 36、connector 26
 
@@ -85,3 +93,4 @@ code 183、desktop 93、mcp 72、plugin 54、cowork 46、skill 36、connector 26
 - 权限模型三层：permission_mode（全局）→ toolPolicy（按 MCP 工具，blocked/ask-session）→ 写工具门控
 - 插件类型 11 种，Android 侧至少实现 skills + commands + mcp-skills 三种即可覆盖核心生态
 - Cowork 与 Code 共享 tool_use/tool_result 协议，Cowork 侧重 SendUserMessage/PushNotification 这类用户交互工具
+- UI 字体 Anthropic Sans/Serif 为 Anthropic 自研，Android 侧需打包字体文件或 fallback 系统字体
