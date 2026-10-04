@@ -8,13 +8,13 @@ extract/usr/lib/claude-desktop/resources/app.asar
 
 ## 解包后顶层结构
 total 32
-drwxr-xr-x 6 runner runner 4096 Oct  4 14:56 .
-drwxr-xr-x 7 runner runner 4096 Oct  4 14:56 ..
-drwxr-xr-x 4 runner runner 4096 Oct  4 14:56 .vite
-drwxr-xr-x 2 runner runner 4096 Oct  4 14:56 compile-cache
-drwxr-xr-x 6 runner runner 4096 Oct  4 14:56 node_modules
--rw-r--r-- 1 runner runner 5024 Oct  4 14:56 package.json
-drwxr-xr-x 5 runner runner 4096 Oct  4 14:56 resources
+drwxr-xr-x 6 runner runner 4096 Oct  4 15:03 .
+drwxr-xr-x 8 runner runner 4096 Oct  4 15:03 ..
+drwxr-xr-x 4 runner runner 4096 Oct  4 15:03 .vite
+drwxr-xr-x 2 runner runner 4096 Oct  4 15:03 compile-cache
+drwxr-xr-x 6 runner runner 4096 Oct  4 15:03 node_modules
+-rw-r--r-- 1 runner runner 5024 Oct  4 15:03 package.json
+drwxr-xr-x 5 runner runner 4096 Oct  4 15:03 resources
 
 ## 目录树（3 层）
 unpacked
@@ -211,6 +211,27 @@ Connector: 18 files
 connector: 26 files
 desktop: 93 files
 code: 183 files
+
+## 主进程协议模式（index.pre.js 命中次数）
+tool_use: 0
+tool_result: 0
+tool_choice: 0
+permission_mode: 0
+allowedTools: 0
+disallowedTools: 0
+input_schema: 0
+mcpServers: 0
+model: 0
+context_window: 0
+system_prompt: 0
+
+## 内置工具名定义命中（所有 build JS）
+
+## 消息角色命中
+user: 0
+assistant: 0
+system: 0
+tool: 0
 
 ## 最大的 20 个 JS 文件
 6600826 unpacked/.vite/build/index.chunk-DuaKZOPP.js
