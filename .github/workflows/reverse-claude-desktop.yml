@@ -24,7 +24,7 @@ jobs:
           echo "rel=$REL" >> "$GITHUB_OUTPUT"
 
       - name: Download claude-desktop .deb
-        run: curl -fLO "https://downloads.claude.ai/${{ steps.deb.outputs.rel }}"
+        run: curl -fLO "https://downloads.claude.ai/claude-desktop/apt/stable/${{ steps.deb.outputs.rel }}"
 
       - name: Extract .deb
         run: |
@@ -50,7 +50,7 @@ jobs:
             echo "# Claude Desktop 逆向分析"
             echo
             echo "## 包来源"
-            echo "https://downloads.claude.ai/${{ steps.deb.outputs.rel }}"
+            echo "https://downloads.claude.ai/claude-desktop/apt/stable/${{ steps.deb.outputs.rel }}"
             echo
             echo "## asar 清单"
             cat asar-list.txt
