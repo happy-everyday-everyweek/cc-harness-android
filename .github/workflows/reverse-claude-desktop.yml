@@ -42,26 +42,26 @@ jobs:
           {
             echo "# Claude Desktop 逆向分析"
             echo
-            echo "## 问候语上下文（渲染进程）"
-            grep -rhoE --include='*.js' '.{40}(Good morning|Good evening|Good afternoon).{60}' "$R" 2>/dev/null | head -8
+            echo "## 字体声明（fontFamily 驼峰，JS）"
+            grep -rhoE --include='*.js' 'fontFamily:[^,;}]{1,90}' "$R" 2>/dev/null | sort -u | head -15
             echo
-            echo "## 字体声明（font-family，渲染进程）"
-            grep -rhoE --include='*.js' 'font-family:[^;}]{1,90}' "$R" 2>/dev/null | sort -u | head -20
+            echo "## 字体声明（css 文件）"
+            find unpacked -name '*.css' -exec grep -hoE 'font-family:[^;}]{1,90}' {} + 2>/dev/null | sort -u | head -15
             echo
-            echo "## 字体名命中（渲染进程）"
-            for f in Claude Sans Styrene Inter Söhne Tiempos system-ui Roboto Helvetica Arial; do
-              N=$(grep -rho --include='*.js' -e "$f" "$R" 2>/dev/null | wc -l)
+            echo "## Inter 上下文"
+            grep -rhoE --include='*.js' '.{40}Inter.{50}' "$R" 2>/dev/null | head -5
+            echo
+            echo "## 问候语（Good 单独搜，全部）"
+            grep -rhoE --include='*.js' '.{30}Good [a-z]+.{40}' unpacked 2>/dev/null | sort -u | head -10
+            echo
+            echo "## 问候语（good 小写，全部）"
+            grep -rhoE --include='*.js' '.{30}good [a-z]+.{40}' unpacked 2>/dev/null | sort -u | head -10
+            echo
+            echo "## 字体名命中（全部进程）"
+            for f in Claude Sans Inter Styrene Söhne Tiempos system-ui; do
+              N=$(grep -rho --include='*.js' -e "$f" unpacked 2>/dev/null | wc -l)
               printf '%s: %s\n' "$f" "$N"
             done
-            echo
-            echo "## Agent 协议模式（全部 build JS）"
-            for p in tool_use tool_result permission_mode mcpServers; do
-              N=$(grep -rho --include='*.js' -e "\"$p\"" -e "'$p'" "$B" 2>/dev/null | wc -l)
-              printf '%s: %s\n' "$p" "$N"
-            done
-            echo
-            echo "## 最大的 12 个 JS 文件"
-            find unpacked -name '*.js' -type f -printf '%s %p\n' 2>/dev/null | sort -rn | head -12
             echo
             echo "## 文件总数与总大小"
             find unpacked -type f | wc -l
