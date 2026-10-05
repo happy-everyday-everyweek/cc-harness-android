@@ -75,22 +75,28 @@ license: Proprietary. LICENSE.txt has complete terms
 - sessionType==="agent" 时 turnHadSendUserMessage 强制为 undefined（agent 会话不直接发用户消息）
 - 元通知机制：enqueueMetaNotification
 
-## UI 设计系统与字体
-- 主字体：Anthropic Sans（--font-sans → --font-anthropic-sans → "anthropic-sans"），fallback ui-sans-serif / -apple-system / system-ui
-- 衬线：Anthropic Serif（--font-anthropic-serif），fallback Georgia / Times New Roman
-- 等宽：ui-monospace / SFMono-Regular / Menlo / Monaco / Consolas
-- 图标字体：Anthropicons（--font-anthropicons，Anthropicons-Variable）
-- 设计系统变量：--cds-font-sans、--cds-font-sans-display、--_cds-title-family（CDS，Claude Design System）
-- 问候语：首页 Good morning/afternoon/evening 为按时间段生成的 greeting 属性；用户输入问候用正则 /^(hi|hey|hello|good (morning|afternoon|evening))/ 识别
+## UI 设计系统与字体（CDS = Claude Design System）
+- 字体变量（.cds-root 定义）：
+  - --cds-font-sans: var(--font-anthropic-sans, var(--cds-font-system)) —— 正文无衬线
+  - --cds-font-sans-display: var(--font-anthropic-sans-display, var(--cds-font-sans)) —— 大标题无衬线
+  - --cds-font-voice: var(--font-anthropic-serif, ui-serif), Georgia, serif —— 语音/人声化文本用衬线
+  - --cds-font-mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace —— 等宽
+- 字体映射：
+  - --font-anthropic-sans: "anthropic-sans", ui-sans-serif, -apple-system, "Segoe UI", "PingFang SC", ...（Sans 完整 fallback 链）
+  - --font-anthropic-serif: "anthropic-serif", ui-serif, Georgia, "Times New Roman", ...（Serif 完整 fallback 链）
+- 问候语字体：Good morning/afternoon/evening 属于 voice 风格文本，用 --cds-font-voice = Anthropic Serif（衬线体）
+- 标题/正文：用 .text-title 类 → --cds-font-sans-display → Anthropic Sans（无衬线）
+- .font-serif 类直接指定 Anthropic Serif
+- @font-face：anthropic-sans/anthropic-serif，weight 300-800 可变，font-display:swap
 
 ## 字体文件（asar 内，每个渲染窗口 assets/ 下各一份）
-- AnthropicSans-Roman-Variable-DDVos-BJ.woff2（Roman 正体，可变字体）
-- AnthropicSans-Italic-Variable-CJtkx3-S.woff2（Italic 斜体，可变字体）
-- AnthropicSerif-Roman-Variable-2VcCjn5t.woff2
-- AnthropicSerif-Italic-Variable-Dcb-9NUS.woff2
-- @font-face 声明：font-family:anthropic-sans;src:url(./AnthropicSans-Roman-Variable-DDVos-BJ.woff2)format("woff2");font-weight:300 800;font-style:normal;font-display:swap
-- 可变字体覆盖 weight 300-800，Android 侧可直接用这 4 个 woff2 文件
-- CDN 静态版（JS 注释提及）：assets.claude.ai/Fonts/AnthropicSerif-Text-{Regular,Medium,Semibold,Bold}{,Italic}-Static.otf；Sans 字体运行时经 #mcp-host-fonts 加载
+- AnthropicSans-Roman-Variable-DDVos-BJ.woff2（Sans 正体，可变字体）
+- AnthropicSans-Italic-Variable-CJtkx3-S.woff2（Sans 斜体）
+- AnthropicSerif-Roman-Variable-2VcCjn5t.woff2（Serif 正体，问候语用）
+- AnthropicSerif-Italic-Variable-Dcb-9NUS.woff2（Serif 斜体）
+- 本地副本：/sdcard/Download/anthropic-fonts/
+- 检查页：/sdcard/Download/anthropic-fonts/font-check.html
+- CDN 静态版（JS 注释提及）：assets.claude.ai/Fonts/AnthropicSerif-Text-{Regular,Medium,Semibold,Bold}-Static.otf
 
 ## 关键字命中（JS 文件数）
 code 183、desktop 93、mcp 72、plugin 54、cowork 46、skill 36、connector 26
@@ -102,4 +108,4 @@ code 183、desktop 93、mcp 72、plugin 54、cowork 46、skill 36、connector 26
 - 权限模型三层：permission_mode（全局）→ toolPolicy（按 MCP 工具，blocked/ask-session）→ 写工具门控
 - 插件类型 11 种，Android 侧至少实现 skills + commands + mcp-skills 三种即可覆盖核心生态
 - Cowork 与 Code 共享 tool_use/tool_result 协议，Cowork 侧重 SendUserMessage/PushNotification 这类用户交互工具
-- UI 字体 Anthropic Sans/Serif 为 Anthropic 自研，Android 侧打包这 4 个 woff2 即可还原官方视觉效果
+- UI 字体：问候语用 Anthropic Serif（voice 类），正文用 Anthropic Sans，Android 侧打包 4 个 woff2 还原官方视觉
