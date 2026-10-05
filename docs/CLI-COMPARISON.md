@@ -1,59 +1,87 @@
-# 四款 AI 编码 CLI 对比：Codex CLI / Grok Build / Z Code / Claude Code
+# 四款 AI 编码 CLI 的 Harness 功能对比（基于源码）
 
-对比维度：厂商模型、架构形态、工具集、代理协议、权限沙箱、上下文、多代理、插件生态、开源许可、定价平台。
+方法：直接读 GitHub 源码。Codex 读 openai/codex 的 codex-rs（Rust，100+ crate）；Grok Build 读 xai-org/grok-build（Rust，crates/build+codegen+common）；Claude Code 闭源，功能来自对 Claude Desktop 官方 deb 的逆向（asar 主 bundle grep）；Z Code 在 GitHub 未找到公开仓库，harness 代码级信息缺失，只保留定位描述。厂商、模型、定价不在本文范围。
 
-## 总览表
+## Codex CLI（openai/codex，codex-rs）
 
-| 维度 | Codex CLI | Grok Build | Z Code | Claude Code |
-| --- | --- | --- | --- | --- |
-| 厂商 | OpenAI | xAI (SpaceXAI) | 智谱 Z.ai | Anthropic |
-| 模型 | GPT-5.2/5.3-Codex | Grok 4.7 | GLM-5 / GLM-5.2 | Claude Opus/Sonnet |
-| 首发 | 2025 | 2026 年中 | 2025-12-26（Alpha） | 2025 |
-| 架构 | 云端编排 | 本地 TUI | 统一桌面 + 多 Agent | 本地优先 |
-| 形态 | CLI | 全屏 TUI | GUI 桌面 + CLI | CLI + TUI |
-| 实现语言 | TypeScript | Rust（99.6%） | 未公开 | TypeScript |
-| 上下文 | 未公开大窗 | 未公开 | GLM-5 窗 | 200K token |
-| 多代理 | Agents SDK 多代理 | headless/ACP 嵌入 | 一键切换多个 Agent | Agent Teams（Lead/Teammate） |
-| 代理协议 | 自有 + MCP | Agent Client Protocol (ACP) | 复用底层 Agent 协议 | tool_use/tool_result + MCP |
-| Web 搜索 | 有 | 有 | 有 | WebSearch/WebFetch 工具 |
-| 沙箱 | 云端沙箱 | 本地执行 | 本地执行 | 本地 + 权限门控 |
-| 开源 | 开源 | 开源（9 天 2.1 万星） | 开源 | 闭源（协议公开） |
-| 定价 | $0.20-1.50/会话 | SuperGrok/X Premium | GLM API 计费 | $0.50-3.00/会话 |
+harness 是 Rust monorepo，codex-rs 下 100 余个 crate。
 
-## Codex CLI（OpenAI）
+编辑机制：apply_patch（codex-rs/core/src/apply_patch.rs + codex-rs/apply-patch crate）。不是直接写文件，而是提交补丁操作 ApplyPatchAction，文件变更分 Add{content}、Delete{content}、Update{unified_diff, move_path, new_content} 四种，用 unified diff 描述。提交前走 assess_patch_safety，结果三态：SafetyCheck::AutoApprove（自动放行）、AskUser（交给工具运行时弹审批）、Reject{reason}（拒绝并回模型）。补丁策略用 PatchPolicyMatcher 匹配。
 
-云端编排型。GPT-5.2/5.3-Codex 驱动，terminal-native，开源。核心是自主任务编排，可派生多个 agent 异步分析、评审、实现。沙箱执行，git 集成顺滑。token 效率约为 Claude Code 的 3 倍，单会话成本更低（$0.20-1.50）。迭代风格是快速出草稿再多次精炼，适合探索式编程和原型。HumanEval 90.2%，SWE-bench 69.1%。约 8 个文件后开始出现上下文衰减。适合终端快速任务、成本敏感的自动化、云端多代理编排。
+执行机制：exec.rs + exec/ + exec-server/ + exec-server-protocol。命令执行走沙箱，参数含 command、cwd、env、approval_policy、sandbox、network、sandbox_permissions。沙箱实现分散在 sandboxing/、linux-sandbox/、windows-sandbox-rs/、windows-sandbox-service/、mxc-sandbox/、bwrap/。网络用 network-proxy/，进程加固 process-hardening/。unified_exec/ 统一执行入口，shell.rs + shell_snapshot.rs 管理 shell 状态快照。
 
-## Grok Build（xAI）
+工具层：tools crate（tool_definition.rs 定义、tool_discovery.rs 发现、tool_executor.rs 执行、tool_spec.rs 规格、tool_search.rs 搜索、tool_config.rs 配置、dynamic_tool.rs 动态工具、mcp_tool.rs MCP 工具、code_mode.rs 代码模式、output_schema.rs 输出 schema）。动态工具发现是特色：有 TOOL_SEARCH_TOOL_NAME、LIST_AVAILABLE_PLUGINS_TO_INSTALL_TOOL_NAME、REQUEST_PLUGIN_INSTALL_TOOL_NAME 三个内置工具，运行时搜索和安装插件。
 
-本地全屏 TUI。Grok 4.7 驱动，99.6% Rust 实现，开源（9 天斩获 2.1 万 GitHub 星，xai-org/grok-build）。理解代码库、编辑文件、执行 shell、搜索网页、管理长任务。三种运行模式：交互式 TUI、无头模式（脚本/CI）、编辑器嵌入（Agent Client Protocol 协议，可接入 VS Code/Cursor 等）。有官方 Claude Code 插件（xai-org/grok-build-plugin-cc），可把 review、rescue、会话迁移委托给 Grok Build。生态活跃，有 grok-app（Tauri 桌面 GUI）、grok-build-vscode 等第三方。适合喜欢全屏终端体验、需要编辑器嵌入、看重开源和 Rust 性能的开发者。
+核心工具 handlers（core/src/tools/handlers/）：apply_patch、current_time、dynamic、extension_tools、get_context_remaining、list_available_plugins_to_install、mcp、mcp_resource、multi_agents（v1+v2）、new_context_window、plan、request_permissions、request_plugin_install、request_user_input（同步+异步）、send_message_to_user_async、shell、sleep、test_sync、tool_search、unified_exec、view_image、wait_for_environment。
 
-## Z Code（智谱 Z.ai）
+多代理：multi_agents.rs + multi_agents_v2.rs + agent_communication.rs + agent_message_board.rs + agent-roles/ + agent-graph-store/ + agent-message-board-client/，有消息板机制。
 
-统一桌面 + 多 Agent 切换。2025 年 12 月 26 日发布（Alpha，Mac/Windows），定位是降低 Claude Code/Codex/Gemini 这类命令行工具的门槛。2026 年 2 月基于 GLM-5，6 月 Z Code 3.0 切换至自研 ZCode Agent 内核，深度适配 GLM-5.2。核心理念是一个 API key 丝滑切换体验多个 Agent 编程工具（可调用 Claude Code、Codex、Gemini 等），提供统一可视化桌面。终端 CLI 形态（ZCode）也能读项目、操作文件、执行命令、Git。注意：2026 年 9 月曝出静默窃码争议（被指未经明确同意读取代码），选型需评估其数据行为。适合想统一管理多个 Agent、用 GLM 模型、偏好图形桌面的开发者。
+模型无关：model-provider/ + model-provider-info/ + models-manager/，另有 ollama/、lmstudio/，支持本地模型和多 provider。
 
-## Claude Code（Anthropic）
+上下文管理：compact.rs + compact_model_fallback.rs + compact_remote_v2.rs + compact_token_budget.rs，context_manager/ + context-fragments/，rollout.rs + rollout_budget.rs 会话录制与预算，thread_manager.rs 线程管理。
 
-本地优先 CLI。Claude Opus/Sonnet 驱动，200K token 上下文，读整个代码库、编辑、跑测试、就地迭代。协议是 tool_use/tool_result content block（content block 类型：tool_use、tool_result、text、thinking、resource），工具集含 Read/Write/Edit/Bash/Glob/Grep/TodoWrite/Task/WebFetch/WebSearch/LS/NotebookEdit，控制工具含 set_model/set_permission_mode/interrupt/stop_task/background_tasks。权限三层：permission_mode（default/auto/bypassPermissions）→ toolPolicy（blocked/ask-session）→ 写工具门控。插件生态 11 种类型（commands/agents/output-styles/skills/workflows/routines/themes/rules/session-env/uploads/mcp-skills），Skills 是 SKILL.md + scripts 的 ZIP 包。MCP 标准协议支持。Agent Teams（Lead/Teammate 角色）。HumanEval 92%，SWE-bench 72.7%。accuracy-first：迭代少、代码质量高、边界错误少，大型多文件重构（15000 行 Python monorepo 跨 12 文件）保持连贯。单会话 $0.50-3.00。闭源但协议格式公开。适合大型多文件项目、复杂重构、高精度编码、Anthropic 生态团队。
+权限：approval_policy、permission_profile、patch_policy、exec_policy、network_policy_decision 五层。safety.rs + guardian/ + guardian_review.rs 安全审查。
 
-## 功能异同
+其他：skills/、hooks/（hook_runtime.rs + hook_mcp_executor.rs）、plugins/ + core-plugins/ + plugin/、connectors/、memories/、worktree/ + git-utils/、file-watcher/、state/、tasks/、voice-host/、realtime-webrtc/、mcp 用 rmcp-client/。
 
-相同点：都是终端优先的 AI 编码代理，都能读代码库、编辑文件、执行命令、Git 集成都支持，都支持 Web 搜索，都支持 MCP 或插件生态，都有开源或协议公开的实现。
+协议：protocol/ + codex-api/ + app-server-protocol/ + code-mode-protocol/ + exec-server-protocol/，MCP 走 rmcp-client。
 
-架构差异：Codex CLI 偏云端编排，把任务交给云端 agent 异步跑；Grok Build 和 Claude Code 偏本地执行，直接在你的机器上操作；Z Code 是统一桌面层，本身不实现代理内核，而是调用底层多个 Agent（Claude Code/Codex/Gemini）。这是 Z Code 最独特的点——它是 Agent 的调度器而非 Agent 本身。
+## Grok Build（xai-org/grok-build）
 
-协议差异：Claude Code 用 Anthropic 的 tool_use/tool_result content block 协议（与 Claude Desktop/Cowork 同源），MCP 做工具扩展；Grok Build 用 Agent Client Protocol（ACP）嵌入编辑器；Codex CLI 用自有协议 + MCP；Z Code 复用底层 Agent 的协议（取决于调用哪个）。
+harness 是 Rust，仓库描述写明 "coding agent harness and TUI"。crates 分 build（xai-proto-build，protobuf 编译）、codegen、common 三组。common 下是核心。
 
-多代理差异：Codex CLI 是松耦合自主代理（Agents SDK）；Claude Code 是结构化 Agent Teams（Lead/Teammate 角色定义）；Grok Build 是 headless 并行 + ACP 嵌入；Z Code 是人工切换多个 Agent（非自动协作）。
+内置工具（xai-tool-types）：Glob（GlobToolInput）、Grep（GrepToolInput, GrepOutputMode, GrepSearchOutput）、Read（ReadLineCounts, ReadLineRange）、Task、WebSearch（WebSearchToolInput, WebSearchOutput）。注意 tool-types 里没有 Write/Edit，文件编辑未在工具类型层出现，可能通过 computer-hub（Computer Use 操作编辑器）或 shell 命令实现，这一点我未在代码里确证。
 
-生态差异：Claude Code 插件类型最丰富（11 种，Skills 格式统一）；Grok Build 开源生态增长最快（9 天 2.1 万星）；Codex CLI 与 OpenAI 生态绑定；Z Code 主打多 Agent 统一入口。
+Task 工具即子代理系统（task.rs）：PLAN_SUBAGENT（规划）、EXPLORE_SUBAGENT（探索）、GENERAL_PURPOSE_SUBAGENT（通用）、BUILTIN_SUBAGENTS（内置子代理集合）、BackgroundSubagent（后台子代理），配套 WaitTasks/KillTask/TaskOutput/MultiTaskOutput 任务管理工具，有 SubagentIsolationMode（子代理隔离模式）、SubagentCapabilityMode、HandedOffSubagentState（交接状态）。
 
-成本差异：Codex CLI 最便宜（token 效率 3 倍），Claude Code 最贵但精度最高，Grok Build 走订阅（SuperGrok/X Premium），Z Code 走 GLM API 计费。
+工具定义（definition.rs）：标准 function calling 格式，ToolDefinition{kind: ToolType::Function, function: FunctionTool{name, description, parameters}}，parameters 是 JSON Schema Value。
 
-安全差异：Codex CLI 云端沙箱隔离；Claude Code 三层权限门控；Grok Build 本地执行需自觉；Z Code 有静默窃码争议，数据行为需警惕。
+tool-protocol（xai-tool-protocol crate）：自定义工具协议，有 envelope（信封）、frames（帧）、handshake（握手）、methods（方法）、registration（注册）、session_event（会话事件）、hook + turn_hook（钩子）、capabilities（能力）、connection、error_codes + error_wire、ids、notification_wire、output_wire、registry_error。这是 Grok Build 自己的工具协议，类似 MCP 的定位。
+
+tool-runtime（xai-tool-runtime）：context、dispatch（分发）、error、mcp_structured_content（MCP 结构化内容）、notification、render、search、streaming、tool。
+
+computer-hub（Computer Use）：xai-computer-hub-core（bot_tools、local、remote、registry、resolver、transport）、xai-computer-hub-sdk（admission、auth、cancel、connection、demux、discovery、handshake、harness、oidc_provider、pool、server、metrics、observability）、xai-computer-hub-mcp-adapter（bridge、transport、types）。这是 Grok Build 的 Computer Use 实现，操作电脑桌面。
+
+其他：xai-grok-compaction（压缩）、xai-interjection-core（注入）、xai-message-delivery-core（消息传递）、xai-circuit-breaker（熔断器）、xai-tracing（追踪）、xai-test-utils。
+
+## Claude Code（Anthropic，闭源，功能来自逆向）
+
+协议：tool_use/tool_result content block。tool_use 结构 {type:"tool_use", name, id, input, _meta}，tool_result 结构 {type:"tool_result", tool_use_id, content}，经 Zod schema 校验。content block 类型还有 text、thinking、resource。流式 delta：thinking_delta、input_json_delta、text。
+
+工具集（逆向自 bundle）：Read、Write、Edit、Bash、Glob、Grep、TodoWrite、Task、WebFetch、WebSearch、LS、NotebookEdit。控制工具：set_model、set_permission_mode、interrupt、stop_task、background_tasks、cancel_async_message、set_max_thinking_tokens。
+
+权限三层：permission_mode（default/auto/bypassPermissions）→ toolPolicy（按 MCP 工具，权限值 blocked/ask-session，被 block 返回 "Tool 'X' is not permitted"）→ 写工具门控 gatedWriteToolCalls。
+
+插件生态 11 种类型：commands、agents、output-styles、skills、workflows、routines、themes、rules、session-env、uploads、mcp-skills。目录映射 commands/、agents/、hooks/、mcpServers（.mcp.json 根级）。
+
+Skills 格式：.skill = ZIP 包，内含 <name>/SKILL.md（YAML frontmatter: name/description/license + Markdown 正文）+ scripts/（Python 脚本、模板、验证器）。
+
+MCP：标准协议，配置新格式 [{serverName, tools:[{toolName, permission}]}]，旧 record 格式已废弃。
+
+Agent Teams：Lead/Teammate 角色协作。
+
+## Z Code（智谱）
+
+GitHub 未找到公开 harness 仓库（search 返回 0），代码级功能无法确证。已知定位：统一可视化桌面，一个 API key 切换调用 Claude Code/Codex/Gemini 等底层 Agent，ZCode Agent 内核，GLM-5/5.2。harness 本身是否自研工具集、编辑机制、执行模型，均无代码可考。2026 年 9 月有静默窃码争议，数据行为需谨慎评估。
+
+## 横向对比
+
+编辑机制：Codex 用 apply_patch（unified diff，Add/Delete/Update/Move，补丁安全评估三态）；Claude Code 用 Write/Edit 直接操作文件；Grok Build 的工具类型层无 Write/Edit，编辑路径未确证（疑走 computer-hub 或 shell）；Z Code 未知。
+
+执行机制：Codex 最重，五层权限（approval/permission/patch/exec/network）+ 多沙箱实现（linux/windows/mxc/bwrap）+ 网络代理 + 进程加固；Grok Build 有 circuit-breaker 熔断 + computer-hub；Claude Code 三层权限门控。
+
+工具发现：Codex 最独特，tool_search/list_available_plugins/request_plugin_install 运行时动态发现和安装插件；Grok Build 用 registration/handshake 静态注册；Claude Code 插件类型静态 11 种。
+
+多代理：Codex 有 multi_agents v1+v2 + 消息板；Grok Build 的 Task 内置 PLAN/EXPLORE/GENERAL_PURPOSE 子代理 + 后台子代理 + 任务管理；Claude Code Agent Teams（Lead/Teammate）；Z Code 是人工切换多 Agent。
+
+协议：Codex 用 Responses API 工具格式 + 自有 protocol + MCP（rmcp-client）；Grok Build 用标准 function calling + 自定义 tool-protocol（envelope/frames/handshake）+ MCP adapter + computer-hub；Claude Code 用 tool_use/tool_result content block + MCP。
+
+模型无关性：Codex 最开放（model-provider + ollama + lmstudio，本地模型）；Grok Build 和 Claude Code 主要走自家 API 但都支持 MCP 扩展；Z Code 调用多家。
+
+上下文压缩：Codex 有 compact（含 token budget、remote v2、model fallback）；Grok Build 有 grok-compaction；Claude Code 逆向未见独立压缩 crate（可能在 agent-sdk 内）。
 
 ## 对 cc-harness-android 的启示
 
-协议层最值得参考 Claude Code 的 tool_use/tool_result content block 设计（与 Claude Desktop 同源，逆向已拿到完整格式）。插件生态参考 Claude Code 的 11 种类型和 Skills ZIP 格式。多代理参考 Claude Code 的 Agent Teams 角色模型。权限参考 Claude Code 的三层门控。Grok Build 的 ACP 是编辑器嵌入的可选协议。Z Code 的多 Agent 统一调度思路可用于 Android harness 的模型切换层。
+编辑机制参考 Codex 的 apply_patch（unified diff 比直接写文件更安全，可审计、可回滚，适合移动端弱网环境）。工具发现参考 Codex 的 tool_search 动态发现，比静态注册更适合移动端按需加载。多代理参考 Grok Build 的 Task 子代理（PLAN/EXPLORE/GENERAL_PURPOSE 分工明确）和 Codex 的消息板。协议层 Claude Code 的 tool_use/tool_result 最简洁（逆向已拿到完整格式），适合移动端重写。权限参考 Codex 五层模型，但移动端可先实现三层。Computer Use（Grok Build 的 computer-hub）对移动端价值有限，可暂不实现。
 
-信息来源：2026 年公开资料（Bing 搜索、GitHub 仓库、百度百科），具体数字以官方最新文档为准。
+所有结论均来自上述代码文件路径或逆向 grep 结果，Z Code 部分明确标注为信息缺失。
