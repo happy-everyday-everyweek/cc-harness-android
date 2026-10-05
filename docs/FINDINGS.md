@@ -83,6 +83,15 @@ license: Proprietary. LICENSE.txt has complete terms
 - 设计系统变量：--cds-font-sans、--cds-font-sans-display、--_cds-title-family（CDS，Claude Design System）
 - 问候语：首页 Good morning/afternoon/evening 为按时间段生成的 greeting 属性；用户输入问候用正则 /^(hi|hey|hello|good (morning|afternoon|evening))/ 识别
 
+## 字体文件（asar 内，每个渲染窗口 assets/ 下各一份）
+- AnthropicSans-Roman-Variable-DDVos-BJ.woff2（Roman 正体，可变字体）
+- AnthropicSans-Italic-Variable-CJtkx3-S.woff2（Italic 斜体，可变字体）
+- AnthropicSerif-Roman-Variable-2VcCjn5t.woff2
+- AnthropicSerif-Italic-Variable-Dcb-9NUS.woff2
+- @font-face 声明：font-family:anthropic-sans;src:url(./AnthropicSans-Roman-Variable-DDVos-BJ.woff2)format("woff2");font-weight:300 800;font-style:normal;font-display:swap
+- 可变字体覆盖 weight 300-800，Android 侧可直接用这 4 个 woff2 文件
+- CDN 静态版（JS 注释提及）：assets.claude.ai/Fonts/AnthropicSerif-Text-{Regular,Medium,Semibold,Bold}{,Italic}-Static.otf；Sans 字体运行时经 #mcp-host-fonts 加载
+
 ## 关键字命中（JS 文件数）
 code 183、desktop 93、mcp 72、plugin 54、cowork 46、skill 36、connector 26
 
@@ -93,4 +102,4 @@ code 183、desktop 93、mcp 72、plugin 54、cowork 46、skill 36、connector 26
 - 权限模型三层：permission_mode（全局）→ toolPolicy（按 MCP 工具，blocked/ask-session）→ 写工具门控
 - 插件类型 11 种，Android 侧至少实现 skills + commands + mcp-skills 三种即可覆盖核心生态
 - Cowork 与 Code 共享 tool_use/tool_result 协议，Cowork 侧重 SendUserMessage/PushNotification 这类用户交互工具
-- UI 字体 Anthropic Sans/Serif 为 Anthropic 自研，Android 侧需打包字体文件或 fallback 系统字体
+- UI 字体 Anthropic Sans/Serif 为 Anthropic 自研，Android 侧打包这 4 个 woff2 即可还原官方视觉效果
