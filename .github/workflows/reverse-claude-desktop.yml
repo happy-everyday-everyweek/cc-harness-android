@@ -37,25 +37,23 @@ jobs:
       - name: Analyze
         run: |
           mkdir -p report
-          B=unpacked/.vite/build
-          R=unpacked/.vite/renderer
           {
-            echo "# 问候语字体分析"
+            echo "# 问候语字体确认"
             echo
-            echo "## greeting 上下文"
-            grep -rhoE --include='*.js' '.{50}greeting.{100}' "$R" 2>/dev/null | sort -u | head -10
+            echo "## CSS 变量定义（title/display/serif/sans）"
+            grep -rhoE --include='*.css' -- '--(_cds-title-family|cds-font-sans-display|cds-font-serif|font-anthropic-serif|font-anthropic-sans|cds-font-sans)[^;{]*[;}]' unpacked 2>/dev/null | sort -u | head -15
             echo
-            echo "## title/display 字体变量"
-            grep -rhoE --include='*.js' '.{40}(cds-font-sans-display|_cds-title-family|cds-title-family).{60}' "$R" 2>/dev/null | sort -u | head -8
+            echo "## greeting 在 build chunk"
+            grep -rhoE --include='*.js' '.{40}[gG]reeting.{80}' unpacked/.vite/build 2>/dev/null | sort -u | head -8
             echo
-            echo "## css 中 title/display 字体"
-            grep -rhoE --include='*.css' 'font-family:[^;}]{1,90}' unpacked 2>/dev/null | grep -iE 'title|display|serif' | sort -u | head -10
+            echo "## 问候语可能组件（timeOfDay/daypart）"
+            grep -rhoE --include='*.js' '.{30}(timeOfDay|daypart|day-part).{60}' unpacked/.vite 2>/dev/null | sort -u | head -8
             echo
-            echo "## 问候语相关 className"
-            grep -rhoE --include='*.js' '[a-zA-Z-]*(greeting|welcome|hero)[a-zA-Z-]*' "$R" 2>/dev/null | sort -u | head -15
-            echo
-            echo "## css 中 greeting/welcome/hero 类"
-            grep -rhoE --include='*.css' '\.[a-zA-Z-]*(greeting|welcome|hero)[a-zA-Z-]*[^{]{0,80}\{[^}]{0,150}' unpacked 2>/dev/null | head -10
+            echo "## serif 使用位置统计"
+            for v in anthropic-serif anthropic-sans cds-font-sans-display cds-title; do
+              N=$(grep -rho --include='*.css' -e "$v" unpacked 2>/dev/null | wc -l)
+              printf '%s: %s\n' "$v" "$N"
+            done
           } > report/REVERSE-CLAUDE-DESKTOP.md
       - name: Collect fonts
         run: |
@@ -72,5 +70,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add report/
-          git commit -m "docs: greeting font analysis" || echo "nothing to commit"
+          git commit -m "docs: greeting font confirm" || echo "nothing to commit"
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/happy-everyday-everyweek/cc-harness-android.git main || echo "push failed"
