@@ -38,29 +38,24 @@ jobs:
         run: |
           mkdir -p report
           {
-            echo "# 字体文件与 @font-face 分析"
+            echo "# 字体文件"
             echo
-            echo "## 字体文件（woff/woff2/ttf/otf）"
-            find unpacked \( -name '*.woff' -o -name '*.woff2' -o -name '*.ttf' -o -name '*.otf' \) | head -30
+            find unpacked/.vite/renderer/main_window/assets -name '*.woff2' -exec ls -la {} +
             echo
-            echo "## @font-face 声明（css）"
-            grep -rhoE --include='*.css' '@font-face[^{]*\{[^}]{0,200}' unpacked 2>/dev/null | head -10
-            echo
-            echo "## @font-face 声明（js 内联）"
-            grep -rhoE --include='*.js' '@font-face[^{]*\{[^}]{0,200}' unpacked 2>/dev/null | head -10
-            echo
-            echo "## 字体 URL（css url 引用）"
-            grep -rhoE --include='*.css' 'url\([^)]{1,150}\)' unpacked 2>/dev/null | grep -iE 'font|woff|ttf|otf|anthropic' | sort -u | head -15
-            echo
-            echo "## 字体名引用（js）"
-            for f in anthropic-sans anthropic-serif Anthropicons cds-font; do
-              N=$(grep -rho --include='*.js' -e "$f" unpacked 2>/dev/null | wc -l)
-              printf '%s: %s\n' "$f" "$N"
-            done
-            echo
-            echo "## deb 内字体（extract 层）"
-            find extract \( -name '*.woff' -o -name '*.woff2' -o -name '*.ttf' -o -name '*.otf' \) | head -20
+            echo "## @font-face"
+            grep -rhoE --include='*.css' '@font-face[^{]*\{[^}]{0,200}' unpacked 2>/dev/null | head -4
           } > report/REVERSE-CLAUDE-DESKTOP.md
+      - name: Collect fonts
+        run: |
+          mkdir -p fonts
+          cp unpacked/.vite/renderer/main_window/assets/*.woff2 fonts/
+          ls -la fonts
+      - name: Upload fonts artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: anthropic-fonts
+          path: fonts/
+          retention-days: 7
       - name: Upload unpacked artifact
         uses: actions/upload-artifact@v4
         with:
@@ -74,5 +69,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add report/
-          git commit -m "docs: font file analysis" || echo "nothing to commit"
+          git commit -m "docs: font analysis" || echo "nothing to commit"
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/happy-everyday-everyweek/cc-harness-android.git main || echo "push failed"
