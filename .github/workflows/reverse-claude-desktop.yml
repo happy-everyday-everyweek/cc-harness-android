@@ -37,24 +37,23 @@ jobs:
       - name: Analyze
         run: |
           mkdir -p report
-          B=unpacked/.vite/build
           {
-            echo "# 问候语组件字体定位"
+            echo "# anthropic-serif 使用验证"
             echo
-            echo "## greeting + fontFamily 同现"
-            grep -rhoE --include='*.js' '.{80}greeting.{200}' "$B" 2>/dev/null | grep -iE 'font|title|display|serif|sans|className' | head -8
+            echo "## anthropic-serif 直接使用规则"
+            grep -rhoE --include='*.css' '[^{}]*\{[^}]*anthropic-serif[^}]*\}' unpacked 2>/dev/null | sort -u | head -15
             echo
-            echo "## 问候语生成（小时判断）"
-            grep -rhoE --include='*.js' '.{40}(getHours|getHour)\(\).{100}' "$B" 2>/dev/null | sort -u | head -8
+            echo "## var(--font-anthropic-serif) 使用规则"
+            grep -rhoE --include='*.css' '[^{}]*\{[^}]*var\(--font-anthropic-serif[^}]*\}' unpacked 2>/dev/null | sort -u | head -15
             echo
-            echo "## 时间段问候文本"
-            grep -rhoE --include='*.js' '.{20}(evening|afternoon).{60}' "$B" 2>/dev/null | grep -iE 'good|greet|morning' | sort -u | head -8
+            echo "## 问候语相关类名"
+            grep -rhoE --include='*.css' '\.[a-zA-Z-]*(greet|welcome|hello|hero|onboarding|empty-state)[a-zA-Z-]*' unpacked 2>/dev/null | sort -u | head -15
             echo
-            echo "## title 类字体声明（css 完整）"
-            grep -rhoE --include='*.css' '[^{}]*title[^{}]*\{[^}]{0,200}\}' unpacked 2>/dev/null | grep -iE 'font-family' | head -8
+            echo "## title-family 覆盖为 serif"
+            grep -rhoE --include='*.css' '_cds-title-family[^;}]*serif[^;}]*[;}]' unpacked 2>/dev/null | sort -u | head -10
             echo
-            echo "## 大号字体（font-size 配合 serif/sans）"
-            grep -rhoE --include='*.css' 'font-family:[^;}]{1,60}[^}]*font-size:[^;}]{1,30}' unpacked 2>/dev/null | sort -u | head -10
+            echo "## serif + font-size 大号组合"
+            grep -rhoE --include='*.css' 'font-family:[^;}]*serif[^;}]*\}[^}]*font-size:[^;}]{1,40}' unpacked 2>/dev/null | sort -u | head -10
           } > report/REVERSE-CLAUDE-DESKTOP.md
       - name: Collect fonts
         run: |
@@ -71,5 +70,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add report/
-          git commit -m "docs: greeting component font" || echo "nothing to commit"
+          git commit -m "docs: verify serif usage" || echo "nothing to commit"
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/happy-everyday-everyweek/cc-harness-android.git main || echo "push failed"
